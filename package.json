@@ -16,5 +16,8 @@
   "bugs": {
     "url": "https://github.com/senhorgomes/tinyapp/issues"
   },
-  "homepage": "https://github.com/senhorgomes/tinyapp#readme"
+  "homepage": "https://github.com/senhorgomes/tinyapp#readme",
+  "dependencies": {
+    "express": "^4.17.1"
+  }
 }
