@@ -33,8 +33,8 @@ app.post("/urls", (req, res) => {
   let longURL = req.body.longURL
   urlDatabase[shortURL] = longURL;
   res.redirect(`/urls/${shortURL}`);
-  res.send("Ok");         // Respond with 'Ok' (we will replace this)
 });
+
 //Indexof all short URLs
 app.get("/urls", (req, res) => {
   let templateVars = { urls: urlDatabase };
@@ -44,11 +44,17 @@ app.get("/urls", (req, res) => {
 app.get("/urls/new", (req, res) => {
   res.render("urls_new");
 });
+//Delete a page
+app.post("/urls/:shortURL/delete", (req, res) => {
+  delete urlDatabase[req.params.shortURL];
+  res.redirect("/urls");
+});
 //Page of single URL
 app.get("/urls/:shortURL", (req, res) => {
   let templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL] };
   res.render("urls_show", templateVars);
 });
+
 //Instead of using /url/ the link can be found using /u/...
 app.get("/u/:shortURL", (req, res) => {
   let longURL = urlDatabase[req.params.shortURL];
