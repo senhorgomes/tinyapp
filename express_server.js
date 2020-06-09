@@ -10,15 +10,15 @@ const urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
   "9sm5xK": "http://www.google.com"
 };
-
+// If we have a GET request asking for the path of '/', do the callback
 app.get("/", (req, res) => {
   res.send("Hello!");
 });
-
+// Trigger a listen action, on a specific port (8080) and do a callback if it worked
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
 });
-
+// If we have a GET request, asking for /urls.json, we do the callback
 app.get("/urls.json", (req, res) => {
   res.json(urlDatabase);
 });
@@ -26,9 +26,8 @@ app.get("/urls.json", (req, res) => {
 app.get("/hello", (req, res) => {
   res.send("<html><body>Hello <b>World</b></body></html>\n");
 });
-
+// An action script that creates a new shortURL
 app.post("/urls", (req, res) => {
-  console.log(req.body);  // Log the POST request body to the console
   let shortURL = generateRandomString();
   let longURL = req.body.longURL
   urlDatabase[shortURL] = longURL;
@@ -49,9 +48,14 @@ app.post("/urls/:shortURL/delete", (req, res) => {
   delete urlDatabase[req.params.shortURL];
   res.redirect("/urls");
 });
-//Page of single URL
+// In the event of a GET request, asking for /urls/somethingIDontKnowYet, do the callback
+// :shortURL is a route parameter, accessible in req.params (like a wildcard)
 app.get("/urls/:shortURL", (req, res) => {
+  // Declare an object called templateVars
+  // Populate the object with : the value of req.params.shortURL, in the key called shortURL
+  // Populate the object with : the value of the urlDatabse, at the key of req.params.shortURL, in the key called longURL
   let templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL] };
+  // Render the template called urls_show, with the values of the object called templateVars
   res.render("urls_show", templateVars);
 });
 
