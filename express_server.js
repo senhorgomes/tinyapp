@@ -39,15 +39,21 @@ app.get("/urls", (req, res) => {
   let templateVars = { urls: urlDatabase };
   res.render("urls_index", templateVars);
 });
-//Creation of new URL
+//Creation of new URL. Not the actual act of it, just the page that hosts it.
 app.get("/urls/new", (req, res) => {
   res.render("urls_new");
 });
-//Delete a page
+//Delete a page whenever called upopn.
 app.post("/urls/:shortURL/delete", (req, res) => {
   delete urlDatabase[req.params.shortURL];
   res.redirect("/urls");
 });
+//Whenever called on, it will take in the information of the existing longURL, and allows you to edit it
+app.post("/urls/:shortURL", (req, res) => {
+  let longURL = req.body.longURL
+  urlDatabase[req.params.shortURL] = longURL;
+  res.redirect("/urls");
+})
 // In the event of a GET request, asking for /urls/somethingIDontKnowYet, do the callback
 // :shortURL is a route parameter, accessible in req.params (like a wildcard)
 app.get("/urls/:shortURL", (req, res) => {
