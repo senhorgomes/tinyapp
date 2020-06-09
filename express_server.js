@@ -29,6 +29,10 @@ app.get("/hello", (req, res) => {
 
 app.post("/urls", (req, res) => {
   console.log(req.body);  // Log the POST request body to the console
+  let shortURL = generateRandomString();
+  let longURL = req.body.longURL
+  urlDatabase[shortURL] = longURL;
+  res.redirect(`/urls/${shortURL}`);
   res.send("Ok");         // Respond with 'Ok' (we will replace this)
 });
 //Indexof all short URLs
@@ -44,6 +48,11 @@ app.get("/urls/new", (req, res) => {
 app.get("/urls/:shortURL", (req, res) => {
   let templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL] };
   res.render("urls_show", templateVars);
+});
+//Instead of using /url/ the link can be found using /u/...
+app.get("/u/:shortURL", (req, res) => {
+  let longURL = urlDatabase[req.params.shortURL];
+  res.redirect(longURL);
 });
 //Chracter set uses the same format as the diceRoller to find a random number. Except this will go through the character length ot characterSet, return one number, and add it to the string. This will happen 6 times, and it will return a full string.
 function generateRandomString() {
