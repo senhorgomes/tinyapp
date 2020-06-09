@@ -12,7 +12,8 @@
       <div class="card-header"></div>
       <div class="card-body">
         <h5 class="card-title">TinyURL for: <%= longURL %></h5>
-        <p class="card-text">Short URL: <a href="/urls/<%= shortURL %>"><%= shortURL %></a></p>
+        <!-- Minor change to the code, because /url/ doesnt have a get redirect function, I changed it to one that did, /u/.-->
+        <p class="card-text">Short URL: <a href="/u/<%= shortURL %>"><%= shortURL %></a></p>
       </div>
     <div class="card-footer text-muted"></div>
   </div>
