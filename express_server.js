@@ -1,6 +1,8 @@
 const express = require('./node_modules/express');
 const app = express();
 app.set("view engine", "ejs")
+const bodyParser = require("body-parser");
+app.use(bodyParser.urlencoded({extended: true}));
 
 const PORT = 8080;
 
