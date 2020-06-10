@@ -7,6 +7,20 @@ const cookieParser = require('cookie-parser')
 app.use(cookieParser())
 const PORT = 8080;
 
+const users = { 
+  "userRandomID": {
+    id: "userRandomID",
+    name: "Bruno", 
+    email: "user@example.com", 
+    password: "purple-monkey-dinosaur"
+  },
+ "user2RandomID": {
+    id: "user2RandomID",
+    name: "Bruno",  
+    email: "user2@example.com", 
+    password: "dishwasher-funk"
+  }
+}
 const urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
   "9sm5xK": "http://www.google.com"
@@ -74,7 +88,16 @@ app.get("/urls/:shortURL", (req, res) => {
 
 //Register a new page
 app.post("/register", (req, res) => {
-  res.status(404);
+  let userId = generateRandomString();
+  const newUser = {
+    name: req.body.name,
+    email: req.body.email,
+    password: req.body.password
+  }
+  users[userId] = newUser;
+  res.cookie('user_id', userId);
+  res.redirect("/urls");
+  console.log(newUser)
 });
 
 // An action script that creates a new shortURL
@@ -118,3 +141,7 @@ function generateRandomString() {
   }
   return url;
 }
+//function generateUserId() {
+//  let userId = Math.random().toString(36).substring(2, 8);
+//  return userId;
+//}
