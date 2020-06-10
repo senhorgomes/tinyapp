@@ -37,12 +37,13 @@ app.post("/urls", (req, res) => {
 
 //Indexof all short URLs
 app.get("/urls", (req, res) => {
-  let templateVars = { urls: urlDatabase };
+  let templateVars = { username: req.cookies["username"], urls: urlDatabase };
   res.render("urls_index", templateVars);
 });
 //Creation of new URL. Not the actual act of it, just the page that hosts it.
 app.get("/urls/new", (req, res) => {
-  res.render("urls_new");
+  let templateVars = { username: req.cookies["username"] };
+  res.render("urls_new", templateVars);
 });
 //Delete a page whenever called upopn.
 app.post("/urls/:shortURL/delete", (req, res) => {
@@ -51,10 +52,14 @@ app.post("/urls/:shortURL/delete", (req, res) => {
 });
 //Allows you to log into the server
 app.post("/login", (req,res) => {
-  res.cookie(username, req.body.username);
+  res.cookie("username", req.body.username);
   res.redirect("/urls");
 });
-
+//Allows user to logout
+app.post("/logout", (req, res) => {
+  res.clearCookie("username");
+  res.redirect("/urls");
+})
 
 //Whenever called on, it will take in the information of the existing longURL, and allows you to edit it
 app.post("/urls/:shortURL", (req, res) => {
@@ -68,15 +73,16 @@ app.get("/urls/:shortURL", (req, res) => {
   // Declare an object called templateVars
   // Populate the object with : the value of req.params.shortURL, in the key called shortURL
   // Populate the object with : the value of the urlDatabse, at the key of req.params.shortURL, in the key called longURL
-  let templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL] };
+  let templateVars = { username: req.cookies["username"], shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL] };
   // Render the template called urls_show, with the values of the object called templateVars
   res.render("urls_show", templateVars);
 });
 
 //Instead of using /url/ the link can be found using /u/...
 app.get("/u/:shortURL", (req, res) => {
+  let templateVars = { username: req.cookies["username"] };
   let longURL = urlDatabase[req.params.shortURL];
-  res.redirect(longURL);
+  res.redirect(longURL, templateVars);
 });
 //Chracter set uses the same format as the diceRoller to find a random number. Except this will go through the character length ot characterSet, return one number, and add it to the string. This will happen 6 times, and it will return a full string.
 function generateRandomString() {
