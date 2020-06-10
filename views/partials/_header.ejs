@@ -10,10 +10,10 @@
         <a class="nav-item nav-link" href="/urls/new">Create New URL</a>
       </div>
     </div>
-    <% if (username) { %>
+    <% if (user_id) { %>
       <form action="/logout" method="POST">
         <div class="d-flex justify-content-end">
-          <p class="nav-item navlink"style="margin: auto">Logged in as <%= username %></p>
+          <p class="nav-item navlink"style="margin: auto">Weclome <%= user_id.name %></p>
           <button type="submit" class="btn btn-outline-dark" style="margin: 1em">Logout</button>
         </div>
       </form>
