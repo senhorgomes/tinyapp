@@ -94,14 +94,16 @@ app.post("/register", (req, res) => {
     email: req.body.email,
     password: req.body.password
   }
-  //Checks if email or password is missing.
+  //Checks if any of the registration forms are missing(name, email, or password).
   if (!req.body.name || !req.body.email || !req.body.password) {
-    res.status(400).send('You did not fill out the registration form');
+    res.status(400).send('You did not complete the registration form, please try again.');
+    //If everything is ok, create the user!
+  } else {
+    users[userId] = newUser;
+    res.cookie('user_id', userId);
+    res.redirect("/urls");
+    console.log(newUser)
   }
-  users[userId] = newUser;
-  res.cookie('user_id', userId);
-  res.redirect("/urls");
-  console.log(newUser)
 });
 
 // An action script that creates a new shortURL
