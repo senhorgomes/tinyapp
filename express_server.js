@@ -86,13 +86,17 @@ app.get("/urls/:shortURL", (req, res) => {
 
 //---------------POST APPS------------------------------
 
-//Register a new page
+//Register a new user
 app.post("/register", (req, res) => {
   let userId = generateRandomString();
   const newUser = {
     name: req.body.name,
     email: req.body.email,
     password: req.body.password
+  }
+  //Checks if email or password is missing.
+  if (!req.body.name || !req.body.email || !req.body.password) {
+    res.status(400).send('You did not fill out the registration form');
   }
   users[userId] = newUser;
   res.cookie('user_id', userId);
