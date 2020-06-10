@@ -52,17 +52,17 @@ app.get("/hello", (req, res) => {
 
 //Indexof all short URLs
 app.get("/urls", (req, res) => {
-  let templateVars = { username: req.cookies["username"], urls: urlDatabase };
+  let templateVars = { user_id: users[req.cookies["user_id"]], urls: urlDatabase };
   res.render("urls_index", templateVars);
 });
 //Creation of new URL. Not the actual act of it, just the page that hosts it.
 app.get("/urls/new", (req, res) => {
-  let templateVars = { username: req.cookies["username"] };
+  let templateVars = { user_id: users[req.cookies["user_id"]] };
   res.render("urls_new", templateVars);
 });
 // Registration page
 app.get("/register", (req, res) => {
-  let templateVars = { username: req.cookies["username"] };
+  let templateVars = { user_id: users[req.cookies["user_id"]] };
   res.render("urls_register", templateVars);
 })
 
@@ -77,7 +77,7 @@ app.get("/urls/:shortURL", (req, res) => {
   // Declare an object called templateVars
   // Populate the object with : the value of req.params.shortURL, in the key called shortURL
   // Populate the object with : the value of the urlDatabse, at the key of req.params.shortURL, in the key called longURL
-  let templateVars = { username: req.cookies["username"], shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL] };
+  let templateVars = { user_id: req.cookies["user_id"], shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL] };
   // Render the template called urls_show, with the values of the object called templateVars
   res.render("urls_show", templateVars);
 });
@@ -115,7 +115,7 @@ app.post("/login", (req,res) => {
 });
 //Allows user to logout from server by clearing cookies
 app.post("/logout", (req, res) => {
-  res.clearCookie("username");
+  res.clearCookie("user_id");
   res.redirect("/urls");
 })
 //Delete a page whenever called upopn.
