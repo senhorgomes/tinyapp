@@ -13,13 +13,14 @@ const urlDatabase = {
 };
 
 //---------------LISTEN APPS------------------------------
-
+ 
 // Trigger a listen action, on a specific port (8080) and do a callback if it worked
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
 });
 
 //---------------GET APPS------------------------------
+
 
 // If we have a GET request asking for the path of '/', do the callback
 app.get("/", (req, res) => {
@@ -40,7 +41,22 @@ app.get("/urls", (req, res) => {
   let templateVars = { username: req.cookies["username"], urls: urlDatabase };
   res.render("urls_index", templateVars);
 });
+//Creation of new URL. Not the actual act of it, just the page that hosts it.
+app.get("/urls/new", (req, res) => {
+  let templateVars = { username: req.cookies["username"] };
+  res.render("urls_new", templateVars);
+});
+// Registration page
+app.get("/urls_register", (req, res) => {
+  let templateVars = { username: req.cookies["username"] };
+  res.render("urls_register", templateVars);
+})
 
+//Instead of using /url/ the link can be found using /u/...
+app.get("/u/:shortURL", (req, res) => {
+  let longURL = urlDatabase[req.params.shortURL];
+  res.redirect(longURL);
+});
 // In the event of a GET request, asking for /urls/somethingIDontKnowYet, do the callback
 // :shortURL is a route parameter, accessible in req.params (like a wildcard)
 app.get("/urls/:shortURL", (req, res) => {
@@ -52,14 +68,12 @@ app.get("/urls/:shortURL", (req, res) => {
   res.render("urls_show", templateVars);
 });
 
-//Instead of using /url/ the link can be found using /u/...
-app.get("/u/:shortURL", (req, res) => {
-  let templateVars = { username: req.cookies["username"] };
-  let longURL = urlDatabase[req.params.shortURL];
-  res.redirect(longURL, templateVars);
-});
+
 
 //---------------POST APPS------------------------------
+
+//Register a new page
+
 
 // An action script that creates a new shortURL
 app.post("/urls", (req, res) => {
@@ -67,12 +81,6 @@ app.post("/urls", (req, res) => {
   let longURL = req.body.longURL
   urlDatabase[shortURL] = longURL;
   res.redirect(`/urls/${shortURL}`);
-});
-
-//Creation of new URL. Not the actual act of it, just the page that hosts it.
-app.get("/urls/new", (req, res) => {
-  let templateVars = { username: req.cookies["username"] };
-  res.render("urls_new", templateVars);
 });
 
 //Allows you to log into the server
