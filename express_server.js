@@ -55,7 +55,7 @@ app.post("/login", (req,res) => {
   res.cookie("username", req.body.username);
   res.redirect("/urls");
 });
-//Allows user to logout
+//Allows user to logout from server by clearing cookies
 app.post("/logout", (req, res) => {
   res.clearCookie("username");
   res.redirect("/urls");
