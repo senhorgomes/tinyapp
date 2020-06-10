@@ -3,7 +3,8 @@ const app = express();
 app.set("view engine", "ejs");
 const bodyParser = require("body-parser");
 app.use(bodyParser.urlencoded({extended: true}));
-
+const cookieParser = require('cookie-parser')
+app.use(cookieParser())
 const PORT = 8080;
 
 const urlDatabase = {
@@ -48,6 +49,13 @@ app.post("/urls/:shortURL/delete", (req, res) => {
   delete urlDatabase[req.params.shortURL];
   res.redirect("/urls");
 });
+//Allows you to log into the server
+app.post("/login", (req,res) => {
+  res.cookie(username, req.body.username);
+  res.redirect("/urls");
+});
+
+
 //Whenever called on, it will take in the information of the existing longURL, and allows you to edit it
 app.post("/urls/:shortURL", (req, res) => {
   let longURL = req.body.longURL
