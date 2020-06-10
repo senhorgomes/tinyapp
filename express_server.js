@@ -47,7 +47,7 @@ app.get("/urls/new", (req, res) => {
   res.render("urls_new", templateVars);
 });
 // Registration page
-app.get("/urls_register", (req, res) => {
+app.get("/register", (req, res) => {
   let templateVars = { username: req.cookies["username"] };
   res.render("urls_register", templateVars);
 })
@@ -73,7 +73,9 @@ app.get("/urls/:shortURL", (req, res) => {
 //---------------POST APPS------------------------------
 
 //Register a new page
-
+app.post("/register", (req, res) => {
+  res.status(404);
+});
 
 // An action script that creates a new shortURL
 app.post("/urls", (req, res) => {
