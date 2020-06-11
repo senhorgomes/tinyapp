@@ -8,18 +8,12 @@ app.use(cookieParser())
 const PORT = 8080;
 
 const users = { 
-  "userRandomID": {
-    id: "userRandomID",
-    name: "Bruno", 
-    email: "user@example.com", 
-    password: "purple-monkey-dinosaur"
+  "t3st1ng": {
+    id: "t3st1ng",
+    name: "TestUser", 
+    email: "hello@hello.com", 
+    password: "123"
   },
- "user2RandomID": {
-    id: "user2RandomID",
-    name: "Bruno",  
-    email: "user2@example.com", 
-    password: "dishwasher-funk"
-  }
 }
 const urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
@@ -100,12 +94,14 @@ app.post("/register", (req, res) => {
     email: req.body.email,
     password: req.body.password
   }
-  const userCheck = checkForExistingEmail
+  const userCheck = checkForExistingEmail(req.body.email);
   //Checks if any of the registration forms are missing(name, email, or password).
   if (!req.body.name || !req.body.email || !req.body.password) {
     res.status(400).send('You did not complete the registration form, please try again.');
     //If email isnt already registered with a user, then proceed, and create the user!
-  } else if (!userCheck){
+  }
+  //runs the checkForExistingEmail, if it returns false, then we are good to go!
+  if (userCheck === false) {
     users[userId] = newUser;
     res.cookie('user_id', userId);
     res.redirect("/urls");
@@ -129,11 +125,14 @@ app.post("/urls", (req, res) => {
 app.post("/login", (req,res) => {
   let email = req.body.email;
   let password = req.body.password;
-  let userId = checkForExistingEmail(email);
-  if (userId) {
-    if (validateLogin(email, password)) {
-      res.cookie('user_id', userId.id);
+  let userEmail = checkForExistingEmail(email);
+  let userCredentials = validateLogin(email, password);
+  if (userEmail) {
+    if (userCredentials) {
+      res.cookie('user_id', userCredentials);
       res.redirect("/urls");
+    } else {
+      res.status(403).send('You have entered the wrong password.');
     }
   } else {
     res.status(403).send('You are not registered.');
@@ -182,9 +181,9 @@ function checkForExistingEmail(email) {
 };
 //Validate password
 function validateLogin(email, password) {
-  let checkUser = checkForExistingEmail(email)
-    if (checkUser.password === password) {
-      return checkUser
+  const checkUser = checkForExistingEmail(email)
+    if (checkUser && checkUser.password === password) {
+      return checkUser.id;
     }
   return false
 };
