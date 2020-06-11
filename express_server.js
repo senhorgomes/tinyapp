@@ -1,11 +1,15 @@
 const express = require('./node_modules/express');
 const app = express();
-app.set("view engine", "ejs");
 const bodyParser = require("body-parser");
-app.use(bodyParser.urlencoded({extended: true}));
 const cookieParser = require('cookie-parser');
+
+
+app.set("view engine", "ejs");
+app.use(bodyParser.urlencoded({extended: true}));
 app.use(cookieParser());
-const PORT = 8080;
+
+const PORT = process.env.PORT || 8080;
+
 //Adding a name key isn't necessary, but it feels more personalized when you log in and see your name not "Welcome, hello@hello.com!"
 const users = {
   "t3st1ng": {
@@ -15,10 +19,12 @@ const users = {
     password: "123"
   },
 };
+
 const urlDatabase = {
   "b2xVn2": {longURL: "http://www.lighthouselabs.ca", userId: "t3st1ng"},
   "9sm5xK": {longURL: "http://www.google.com", userId: "t3st1ng"}
 };
+
 
 //---------------LISTEN APPS------------------------------
  
@@ -52,10 +58,18 @@ app.get("/login", (req, res) => {
 
 //Indexof all short URLs
 app.get("/urls", (req, res) => {
-  
-  let templateVars = { user_id: users[req.cookies["user_id"]], urls: urlDatabase };
+  const cookieUserId = req.cookies["user_id"];
+  console.log(cookieUserId);
+  const results = urlsForUser(cookieUserId);
+  console.log(results);
+  let templateVars = { user_id: users[req.cookies["user_id"]], urls: results };
   res.render("urls_index", templateVars);
 });
+
+
+
+
+
 //Creation of new URL. Not the actual act of it, just the page that hosts it.
 app.get("/urls/new", (req, res) => {
   let templateVars = { user_id: users[req.cookies["user_id"]] };
@@ -188,4 +202,18 @@ function validateLogin(email, password) {
     return checkUser.id;
   }
   return false;
+}
+
+// Checks user ID and returns the URLS for it
+//Go through current database
+//Copy the object-keys that match the user id into the new database
+//display only those
+function urlsForUser(id) {
+  const filteredDatabase = {};
+  for (let shortURL in urlDatabase) {
+    if (urlDatabase[shortURL].userId === id) {
+      filteredDatabase[shortURL] = urlDatabase[shortURL];
+    }
+  }
+  return filteredDatabase
 }
