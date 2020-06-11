@@ -89,15 +89,13 @@ app.get("/urls/:shortURL", (req, res) => {
   // Populate the object with : the value of the urlDatabse, at the key of req.params.shortURL, in the key called longURL
   let shortURL = req.params.shortURL
   const cookieUserId = req.cookies["user_id"];
-  const results = urlsForUser(cookieUserId);
-  for (let URL of results) {
-    if (URL === shortURL) {
-      let templateVars = { user_id: users[req.cookies["user_id"]], shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL].longURL };
-      // Render the template called urls_show, with the values of the object called templateVars
-      res.render("urls_show", templateVars);
-    }
+  if (urlDatabase[shortURL].userId === cookieUserId) {
+    let templateVars = { user_id: users[req.cookies["user_id"]], shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL].longURL };
+    // Render the template called urls_show, with the values of the object called templateVars
+    res.render("urls_show", templateVars);
+  } else {
+    res.redirect("/login");
   }
-  res.redirect("/login");
 });
 
 
