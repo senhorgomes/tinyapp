@@ -97,12 +97,15 @@ app.post("/register", (req, res) => {
   //Checks if any of the registration forms are missing(name, email, or password).
   if (!req.body.name || !req.body.email || !req.body.password) {
     res.status(400).send('You did not complete the registration form, please try again.');
-    //If everything is ok, create the user!
-  } else {
+    //If email isnt already registered with a user, then proceed, and create the user!
+  } else if (!checkForExistingEmail(req.body.email)){
     users[userId] = newUser;
     res.cookie('user_id', userId);
     res.redirect("/urls");
     console.log(newUser)
+  } else {
+    //if an existing email address is found, proceed to send a 400 error message
+    res.status(400).send('You are already registered.');
   }
 });
 
@@ -146,8 +149,17 @@ function generateRandomString() {
     url += characterSet.charAt(Math.floor(Math.random() * characterSet.length));
   }
   return url;
-}
+};
 //function generateUserId() {
 //  let userId = Math.random().toString(36).substring(2, 8);
 //  return userId;
 //}
+//Helper function allows you to check for an existing email address, if it encounters it, it returns true.
+function checkForExistingEmail (email) {
+  for (let userId in users) {
+    if (users[userId].email === email) {
+      return true
+    }
+  }
+  return false
+};
