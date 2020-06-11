@@ -56,18 +56,13 @@ app.get("/login", (req, res) => {
   res.render("urls_login", templateVars);
 });
 
-//Indexof all short URLs
+//Indexof all short URLs, now with a filtered function
 app.get("/urls", (req, res) => {
   const cookieUserId = req.cookies["user_id"];
-  console.log(cookieUserId);
   const results = urlsForUser(cookieUserId);
-  console.log(results);
   let templateVars = { user_id: users[req.cookies["user_id"]], urls: results };
   res.render("urls_index", templateVars);
 });
-
-
-
 
 
 //Creation of new URL. Not the actual act of it, just the page that hosts it.
@@ -92,9 +87,17 @@ app.get("/urls/:shortURL", (req, res) => {
   // Declare an object called templateVars
   // Populate the object with : the value of req.params.shortURL, in the key called shortURL
   // Populate the object with : the value of the urlDatabse, at the key of req.params.shortURL, in the key called longURL
-  let templateVars = { user_id: req.cookies["user_id"], shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL].longURL };
-  // Render the template called urls_show, with the values of the object called templateVars
-  res.render("urls_show", templateVars);
+  let shortURL = req.params.shortURL
+  const cookieUserId = req.cookies["user_id"];
+  const results = urlsForUser(cookieUserId);
+  for (let URL of results) {
+    if (URL === shortURL) {
+      let templateVars = { user_id: users[req.cookies["user_id"]], shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL].longURL };
+      // Render the template called urls_show, with the values of the object called templateVars
+      res.render("urls_show", templateVars);
+    }
+  }
+  res.redirect("/login");
 });
 
 
@@ -133,7 +136,12 @@ app.post("/register", (req, res) => {
 app.post("/urls", (req, res) => {
   let shortURL = generateRandomString();
   let longURL = req.body.longURL;
-  urlDatabase[shortURL] = longURL;
+  const newShortURL = {
+    longURL: longURL,
+    userId: req.cookies["user_id"]
+  };
+  urlDatabase[shortURL] = newShortURL;
+  console.log(urlDatabase);
   res.redirect(`/urls/${shortURL}`);
 });
 
