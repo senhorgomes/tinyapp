@@ -92,11 +92,6 @@ app.get("/urls/:shortURL", (req, res) => {
 
 //---------------POST APPS------------------------------
 
-//Login as existing user
-app.post("/login",(req, res) => {
-
-});
-
 //Register a new user
 app.post("/register", (req, res) => {
   let userId = generateRandomString();
@@ -105,11 +100,12 @@ app.post("/register", (req, res) => {
     email: req.body.email,
     password: req.body.password
   }
+  const userCheck = checkForExistingEmail
   //Checks if any of the registration forms are missing(name, email, or password).
   if (!req.body.name || !req.body.email || !req.body.password) {
     res.status(400).send('You did not complete the registration form, please try again.');
     //If email isnt already registered with a user, then proceed, and create the user!
-  } else if (!checkForExistingEmail(req.body.email)){
+  } else if (!userCheck){
     users[userId] = newUser;
     res.cookie('user_id', userId);
     res.redirect("/urls");
@@ -131,8 +127,17 @@ app.post("/urls", (req, res) => {
 
 //Allows you to log into the server
 app.post("/login", (req,res) => {
-  res.cookie("username", req.body.username);
-  res.redirect("/urls");
+  let email = req.body.email;
+  let password = req.body.password;
+  let userId = checkForExistingEmail(email);
+  if (userId) {
+    if (validateLogin(email, password)) {
+      res.cookie('user_id', userId.id);
+      res.redirect("/urls");
+    }
+  } else {
+    res.status(403).send('You are not registered.');
+  }
 });
 //Allows user to logout from server by clearing cookies
 app.post("/logout", (req, res) => {
@@ -167,11 +172,19 @@ function generateRandomString() {
 //  return userId;
 //}
 //Helper function allows you to check for an existing email address, if it encounters it, it returns true.
-function checkForExistingEmail (email) {
+function checkForExistingEmail(email) {
   for (let userId in users) {
     if (users[userId].email === email) {
-      return true
+      return users[userId]
     }
   }
+  return false
+};
+//Validate password
+function validateLogin(email, password) {
+  let checkUser = checkForExistingEmail(email)
+    if (checkUser.password === password) {
+      return checkUser
+    }
   return false
 };
