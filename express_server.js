@@ -50,6 +50,11 @@ app.get("/hello", (req, res) => {
   res.send("<html><body>Hello <b>World</b></body></html>\n");
 });
 
+//Login page
+app.get("/login", (req, res) => {
+
+});
+
 //Indexof all short URLs
 app.get("/urls", (req, res) => {
   let templateVars = { user_id: users[req.cookies["user_id"]], urls: urlDatabase };
@@ -86,6 +91,11 @@ app.get("/urls/:shortURL", (req, res) => {
 
 //---------------POST APPS------------------------------
 
+//Login as existing user
+app.post("/login",(req, res) => {
+
+});
+
 //Register a new user
 app.post("/register", (req, res) => {
   let userId = generateRandomString();
@@ -102,6 +112,7 @@ app.post("/register", (req, res) => {
     users[userId] = newUser;
     res.cookie('user_id', userId);
     res.redirect("/urls");
+    //The console logging is a safety measure. It allows you to double check if the user was added to the database or not
     console.log(newUser)
   } else {
     //if an existing email address is found, proceed to send a 400 error message
