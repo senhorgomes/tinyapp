@@ -52,7 +52,8 @@ app.get("/hello", (req, res) => {
 
 //Login page
 app.get("/login", (req, res) => {
-
+  let templateVars = { user_id: users[req.cookies["user_id"]], urls: urlDatabase };
+  res.render("urls_login", templateVars);
 });
 
 //Indexof all short URLs
