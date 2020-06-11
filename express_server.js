@@ -94,7 +94,7 @@ app.get("/urls/:shortURL", (req, res) => {
     // Render the template called urls_show, with the values of the object called templateVars
     res.render("urls_show", templateVars);
   } else {
-    res.redirect("/login");
+    res.status(400).send('You are not logged in, or authorized to edit this link.');
   }
 });
 
@@ -167,14 +167,26 @@ app.post("/logout", (req, res) => {
 });
 //Delete a page whenever called upopn.
 app.post("/urls/:shortURL/delete", (req, res) => {
-  delete urlDatabase[req.params.shortURL];
-  res.redirect("/urls");
+  let shortURL = req.params.shortURL
+  const cookieUserId = req.cookies["user_id"];
+  if (urlDatabase[shortURL].userId === cookieUserId) {
+    delete urlDatabase[req.params.shortURL];
+    res.redirect("/urls");
+  } else {
+    res.status(400).send('You are not logged in, or authorized to edit this link.');
+  }
 });
 //Whenever called on, it will take in the information of the existing longURL, and allows you to edit it
 app.post("/urls/:shortURL", (req, res) => {
-  let longURL = req.body.longURL;
-  urlDatabase[req.params.shortURL] = longURL;
-  res.redirect("/urls");
+  let shortURL = req.params.shortURL
+  const cookieUserId = req.cookies["user_id"];
+  if (urlDatabase[shortURL].userId === cookieUserId) {
+    let longURL = req.body.longURL;
+    urlDatabase[req.params.shortURL] = longURL;
+    res.redirect("/urls");
+  } else {
+    res.status(400).send('You are not logged in, or authorized to edit this link.');
+  }
 });
 
 //-----------Functions (to be exported and imported in future update)------------
