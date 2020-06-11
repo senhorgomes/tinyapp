@@ -90,6 +90,7 @@ app.get("/urls/:shortURL", (req, res) => {
 app.post("/register", (req, res) => {
   let userId = generateRandomString();
   const newUser = {
+    id: userId,
     name: req.body.name,
     email: req.body.email,
     password: req.body.password
@@ -106,7 +107,7 @@ app.post("/register", (req, res) => {
     res.cookie('user_id', userId);
     res.redirect("/urls");
     //The console logging is a safety measure. It allows you to double check if the user was added to the database or not
-    console.log(newUser)
+    console.log(users)
   } else {
     //if an existing email address is found, proceed to send a 400 error message
     res.status(400).send('You are already registered.');
