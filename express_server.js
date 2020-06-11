@@ -3,21 +3,21 @@ const app = express();
 app.set("view engine", "ejs");
 const bodyParser = require("body-parser");
 app.use(bodyParser.urlencoded({extended: true}));
-const cookieParser = require('cookie-parser')
-app.use(cookieParser())
+const cookieParser = require('cookie-parser');
+app.use(cookieParser());
 const PORT = 8080;
-
-const users = { 
+//Adding a name key isn't necessary, but it feels more personalized when you log in and see your name not "Welcome, hello@hello.com!"
+const users = {
   "t3st1ng": {
     id: "t3st1ng",
-    name: "TestUser", 
-    email: "hello@hello.com", 
+    name: "TestUser",
+    email: "hello@hello.com",
     password: "123"
   },
-}
+};
 const urlDatabase = {
-  "b2xVn2": "http://www.lighthouselabs.ca",
-  "9sm5xK": "http://www.google.com"
+  "b2xVn2": {longURL: "http://www.lighthouselabs.ca", userId: "t3st1ng"},
+  "9sm5xK": {longURL: "http://www.google.com", userId: "t3st1ng"}
 };
 
 //---------------LISTEN APPS------------------------------
@@ -52,6 +52,7 @@ app.get("/login", (req, res) => {
 
 //Indexof all short URLs
 app.get("/urls", (req, res) => {
+  
   let templateVars = { user_id: users[req.cookies["user_id"]], urls: urlDatabase };
   res.render("urls_index", templateVars);
 });
@@ -64,11 +65,11 @@ app.get("/urls/new", (req, res) => {
 app.get("/register", (req, res) => {
   let templateVars = { user_id: users[req.cookies["user_id"]] };
   res.render("urls_register", templateVars);
-})
+});
 
 //Instead of using /url/ the link can be found using /u/...
 app.get("/u/:shortURL", (req, res) => {
-  let longURL = urlDatabase[req.params.shortURL];
+  let longURL = urlDatabase[req.params.shortURL].longURL;
   res.redirect(longURL);
 });
 // In the event of a GET request, asking for /urls/somethingIDontKnowYet, do the callback
@@ -77,7 +78,7 @@ app.get("/urls/:shortURL", (req, res) => {
   // Declare an object called templateVars
   // Populate the object with : the value of req.params.shortURL, in the key called shortURL
   // Populate the object with : the value of the urlDatabse, at the key of req.params.shortURL, in the key called longURL
-  let templateVars = { user_id: req.cookies["user_id"], shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL] };
+  let templateVars = { user_id: req.cookies["user_id"], shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL].longURL };
   // Render the template called urls_show, with the values of the object called templateVars
   res.render("urls_show", templateVars);
 });
@@ -94,7 +95,7 @@ app.post("/register", (req, res) => {
     name: req.body.name,
     email: req.body.email,
     password: req.body.password
-  }
+  };
   const userCheck = checkForExistingEmail(req.body.email);
   //Checks if any of the registration forms are missing(name, email, or password).
   if (!req.body.name || !req.body.email || !req.body.password) {
@@ -107,7 +108,7 @@ app.post("/register", (req, res) => {
     res.cookie('user_id', userId);
     res.redirect("/urls");
     //The console logging is a safety measure. It allows you to double check if the user was added to the database or not
-    console.log(users)
+    console.log(users);
   } else {
     //if an existing email address is found, proceed to send a 400 error message
     res.status(400).send('You are already registered.');
@@ -117,7 +118,7 @@ app.post("/register", (req, res) => {
 // An action script that creates a new shortURL
 app.post("/urls", (req, res) => {
   let shortURL = generateRandomString();
-  let longURL = req.body.longURL
+  let longURL = req.body.longURL;
   urlDatabase[shortURL] = longURL;
   res.redirect(`/urls/${shortURL}`);
 });
@@ -143,7 +144,7 @@ app.post("/login", (req,res) => {
 app.post("/logout", (req, res) => {
   res.clearCookie("user_id");
   res.redirect("/urls");
-})
+});
 //Delete a page whenever called upopn.
 app.post("/urls/:shortURL/delete", (req, res) => {
   delete urlDatabase[req.params.shortURL];
@@ -151,22 +152,22 @@ app.post("/urls/:shortURL/delete", (req, res) => {
 });
 //Whenever called on, it will take in the information of the existing longURL, and allows you to edit it
 app.post("/urls/:shortURL", (req, res) => {
-  let longURL = req.body.longURL
+  let longURL = req.body.longURL;
   urlDatabase[req.params.shortURL] = longURL;
   res.redirect("/urls");
-})
+});
 
 //-----------Functions (to be exported and imported in future update)------------
 
 //Chracter set uses the same format as the diceRoller to find a random number. Except this will go through the character length ot characterSet, return one number, and add it to the string. This will happen 6 times, and it will return a full string.
-function generateRandomString() {
+const generateRandomString = () => {
   let url = "";
   const characterSet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
   for (let i = 0; i < 6; i++) {
     url += characterSet.charAt(Math.floor(Math.random() * characterSet.length));
   }
   return url;
-};
+}
 //function generateUserId() {
 //  let userId = Math.random().toString(36).substring(2, 8);
 //  return userId;
@@ -175,16 +176,16 @@ function generateRandomString() {
 function checkForExistingEmail(email) {
   for (let userId in users) {
     if (users[userId].email === email) {
-      return users[userId]
+      return users[userId];
     }
   }
-  return false
-};
+  return false;
+}
 //Validate password
 function validateLogin(email, password) {
   const checkUser = checkForExistingEmail(email)
-    if (checkUser && checkUser.password === password) {
-      return checkUser.id;
-    }
-  return false
-};
+  if (checkUser && checkUser.password === password) {
+    return checkUser.id;
+  }
+  return false;
+}
