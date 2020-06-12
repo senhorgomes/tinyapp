@@ -38,18 +38,9 @@ app.listen(PORT, () => {
 //---------------GET APPS------------------------------
 
 
-// If we have a GET request asking for the path of '/', do the callback
-app.get("/", (req, res) => {
-  res.send("Hello!");
-});
-
 // If we have a GET request, asking for /urls.json, we do the callback
 app.get("/urls.json", (req, res) => {
   res.json(urlDatabase);
-});
-
-app.get("/hello", (req, res) => {
-  res.send("<html><body>Hello <b>World</b></body></html>\n");
 });
 
 //Login page
@@ -147,6 +138,7 @@ app.post("/urls", (req, res) => {
 });
 
 //Allows you to log into the server
+//Uses two helper functions located below. It seems bad practice, but it allows the server to submit proper messages,tells you that you are not registered if the email doesnt match, or it will tell you the password is incorrect
 app.post("/login", (req,res) => {
   let email = req.body.email;
   let password = req.body.password;
@@ -217,6 +209,7 @@ function checkForExistingEmail(email) {
   return false;
 }
 //Validate password
+//Added encryption for passwords
 function validateLogin(email, password) {
   const checkUser = checkForExistingEmail(email)
   if (checkUser && bcrypt.compareSync(password, checkUser.password)) {
