@@ -2,6 +2,8 @@ const express = require('./node_modules/express');
 const app = express();
 const bodyParser = require("body-parser");
 const cookieParser = require('cookie-parser');
+const bcrypt = require('bcrypt');
+const saltRounds = 10;
 
 
 app.set("view engine", "ejs");
@@ -16,7 +18,7 @@ const users = {
     id: "t3st1ng",
     name: "TestUser",
     email: "hello@hello.com",
-    password: "123"
+    password: bcrypt.hashSync('123', saltRounds)
   },
 };
 
@@ -105,11 +107,12 @@ app.get("/urls/:shortURL", (req, res) => {
 //Register a new user
 app.post("/register", (req, res) => {
   let userId = generateRandomString();
+  let hashedPassword = bcrypt.hashSync(req.body.password, saltRounds)
   const newUser = {
     id: userId,
     name: req.body.name,
     email: req.body.email,
-    password: req.body.password
+    password: hashedPassword
   };
   const userCheck = checkForExistingEmail(req.body.email);
   //Checks if any of the registration forms are missing(name, email, or password).
@@ -181,8 +184,8 @@ app.post("/urls/:shortURL", (req, res) => {
   let shortURL = req.params.shortURL
   const cookieUserId = req.cookies["user_id"];
   if (urlDatabase[shortURL].userId === cookieUserId) {
-    let longURL = req.body.longURL;
-    urlDatabase[req.params.shortURL] = longURL;
+    let newLongURL = req.body.longURL;
+    urlDatabase[req.params.shortURL].longURL = newLongURL;
     res.redirect("/urls");
   } else {
     res.status(400).send('You are not logged in, or authorized to edit this link.');
@@ -216,7 +219,7 @@ function checkForExistingEmail(email) {
 //Validate password
 function validateLogin(email, password) {
   const checkUser = checkForExistingEmail(email)
-  if (checkUser && checkUser.password === password) {
+  if (checkUser && bcrypt.compareSync(password, checkUser.password)) {
     return checkUser.id;
   }
   return false;
