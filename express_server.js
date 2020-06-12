@@ -77,11 +77,9 @@ app.get("/u/:shortURL", (req, res) => {
 // In the event of a GET request, asking for /urls/somethingIDontKnowYet, do the callback
 // :shortURL is a route parameter, accessible in req.params (like a wildcard)
 app.get("/urls/:shortURL", (req, res) => {
-  // Declare an object called templateVars
-  // Populate the object with : the value of req.params.shortURL, in the key called shortURL
-  // Populate the object with : the value of the urlDatabse, at the key of req.params.shortURL, in the key called longURL
-  let shortURL = req.params.shortURL
+  let shortURL = req.params.shortURL;
   const cookieUserId = req.cookies["user_id"];
+  //Checks if you are the user that created the shortURL, if not, you are routed to a 400 message.
   if (urlDatabase[shortURL].userId === cookieUserId) {
     let templateVars = { user_id: users[req.cookies["user_id"]], shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL].longURL };
     // Render the template called urls_show, with the values of the object called templateVars
@@ -98,7 +96,7 @@ app.get("/urls/:shortURL", (req, res) => {
 //Register a new user
 app.post("/register", (req, res) => {
   let userId = generateRandomString();
-  let hashedPassword = bcrypt.hashSync(req.body.password, saltRounds)
+  let hashedPassword = bcrypt.hashSync(req.body.password, saltRounds);
   const newUser = {
     id: userId,
     name: req.body.name,
@@ -162,7 +160,7 @@ app.post("/logout", (req, res) => {
 });
 //Delete a page whenever called upopn.
 app.post("/urls/:shortURL/delete", (req, res) => {
-  let shortURL = req.params.shortURL
+  let shortURL = req.params.shortURL;
   const cookieUserId = req.cookies["user_id"];
   if (urlDatabase[shortURL].userId === cookieUserId) {
     delete urlDatabase[req.params.shortURL];
@@ -173,7 +171,7 @@ app.post("/urls/:shortURL/delete", (req, res) => {
 });
 //Whenever called on, it will take in the information of the existing longURL, and allows you to edit it
 app.post("/urls/:shortURL", (req, res) => {
-  let shortURL = req.params.shortURL
+  let shortURL = req.params.shortURL;
   const cookieUserId = req.cookies["user_id"];
   if (urlDatabase[shortURL].userId === cookieUserId) {
     let newLongURL = req.body.longURL;
@@ -194,40 +192,40 @@ const generateRandomString = () => {
     url += characterSet.charAt(Math.floor(Math.random() * characterSet.length));
   }
   return url;
-}
+};
 //function generateUserId() {
 //  let userId = Math.random().toString(36).substring(2, 8);
 //  return userId;
 //}
 //Helper function allows you to check for an existing email address, if it encounters it, it returns true.
-function checkForExistingEmail(email) {
+const checkForExistingEmail = (email) => {
   for (let userId in users) {
     if (users[userId].email === email) {
       return users[userId];
     }
   }
   return false;
-}
+};
 //Validate password
 //Added encryption for passwords
-function validateLogin(email, password) {
-  const checkUser = checkForExistingEmail(email)
+const validateLogin = (email, password) => {
+  const checkUser = checkForExistingEmail(email);
   if (checkUser && bcrypt.compareSync(password, checkUser.password)) {
     return checkUser.id;
   }
   return false;
-}
+};
 
 // Checks user ID and returns the URLS for it
 //Go through current database
 //Copy the object-keys that match the user id into the new database
 //display only those
-function urlsForUser(id) {
+const urlsForUser = (id) => {
   const filteredDatabase = {};
   for (let shortURL in urlDatabase) {
     if (urlDatabase[shortURL].userId === id) {
       filteredDatabase[shortURL] = urlDatabase[shortURL];
     }
   }
-  return filteredDatabase
-}
+  return filteredDatabase;
+};
