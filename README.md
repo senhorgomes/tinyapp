@@ -9,8 +9,9 @@ Bryan G.
 
 ## Final Product
 
-!["screenshot description"](#)
-!["screenshot description"](#)
+!["Screenshot of registration page"](https://github.com/senhorgomes/tinyapp/blob/master/docs/TinyAppScreenshot2.png)
+!["Screenshot of MyURLs page"](https://github.com/senhorgomes/tinyapp/blob/master/docs/TinyAppScreenshot1.png)
+!["Screenshot of shortURL edit page"](https://github.com/senhorgomes/tinyapp/blob/master/docs/TinyAppScreenshot3.png)
 
 ## Dependencies
 
