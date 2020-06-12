@@ -146,7 +146,7 @@ app.post("/register", (req, res) => {
     res.cookie('currentUserId', userId);
     res.redirect("/urls");
     //The console logging is a safety measure. It allows you to double check if the user was added to the database or not
-    console.log(users);
+    //console.log(users);
   } else {
     //if an existing email address is found, proceed to send a 400 error message
     res.status(400).send('You are already registered.');
@@ -162,7 +162,6 @@ app.post("/urls", (req, res) => {
     userId: req.session['currentUserId']
   };
   urlDatabase[shortURL] = newShortURL;
-  console.log(urlDatabase);
   res.redirect(`/urls/${shortURL}`);
 });
 
