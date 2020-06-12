@@ -8,17 +8,17 @@
       <div class="navbar-nav">
         <a class="nav-item nav-link" href="/urls">My URLs</a>
         <!--If a user is logged in, the conditional allows them to submit a new link, if not, it will redirect you to the login page-->
-        <% if (user_id) { %>
+        <% if (currentUserId) { %>
           <a class="nav-item nav-link" href="/urls/new">Create New URL</a>
         <% } else { %>
           <a class="nav-item nav-link" href="/login">Create New URL</a>
         <% } %>
       </div>
     </div>
-    <% if (user_id) { %>
+    <% if (currentUserId) { %>
       <form action="/logout" method="POST">
         <div class="d-flex justify-content-end">
-          <p class="nav-item navlink"style="margin: auto">Weclome <%= user_id.name %></p>
+          <p class="nav-item navlink"style="margin: auto">Weclome <%= currentUserId.name %></p>
           <button type="submit" class="btn btn-outline-dark" style="margin: 1em">Logout</button>
         </div>
       </form>
