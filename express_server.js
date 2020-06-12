@@ -50,44 +50,44 @@ app.get("/urls.json", (req, res) => {
 
 //Login page
 app.get("/login", (req, res) => {
-  let templateVars = { user_id: users[req.cookies["user_id"]], urls: urlDatabase };
+  const templateVars = { user_id: users[req.session['user_id']], urls: urlDatabase };
   res.render("urls_login", templateVars);
 });
 
 // Registration page
 app.get("/register", (req, res) => {
-  let templateVars = { user_id: users[req.cookies["user_id"]] };
+  const templateVars = { user_id: users[req.session['user_id']] };
   res.render("urls_register", templateVars);
 });
 
 //Indexof all short URLs, now with a filtered function
 app.get("/urls", (req, res) => {
-  const cookieUserId = req.cookies["user_id"];
+  const cookieUserId = req.session['user_id'];
   const results = urlsForUser(cookieUserId);
-  let templateVars = { user_id: users[req.cookies["user_id"]], urls: results };
+  const templateVars = { user_id: users[req.session['user_id']], urls: results };
   res.render("urls_index", templateVars);
 });
 
 
 //Creation of new URL. Not the actual act of it, just the page that hosts it.
 app.get("/urls/new", (req, res) => {
-  let templateVars = { user_id: users[req.cookies["user_id"]] };
+  const templateVars = { user_id: users[req.session['user_id']] };
   res.render("urls_new", templateVars);
 });
 
 //Instead of using /url/ the link can be found using /u/...
 app.get("/u/:shortURL", (req, res) => {
-  let longURL = urlDatabase[req.params.shortURL].longURL;
+  const longURL = urlDatabase[req.params.shortURL].longURL;
   res.redirect(longURL);
 });
 // In the event of a GET request, asking for /urls/somethingIDontKnowYet, do the callback
 // :shortURL is a route parameter, accessible in req.params (like a wildcard)
 app.get("/urls/:shortURL", (req, res) => {
   let shortURL = req.params.shortURL;
-  const cookieUserId = req.cookies["user_id"];
+  const cookieUserId = req.session['user_id'];
   //Checks if you are the user that created the shortURL, if not, you are routed to a 400 message.
   if (urlDatabase[shortURL].userId === cookieUserId) {
-    let templateVars = { user_id: users[req.cookies["user_id"]], shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL].longURL };
+    let templateVars = { user_id: users[req.session['user_id']], shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL].longURL };
     // Render the template called urls_show, with the values of the object called templateVars
     res.render("urls_show", templateVars);
   } else {
@@ -108,7 +108,7 @@ app.post("/login", (req,res) => {
   let userCredentials = validateLogin(email, password);
   if (userEmail) {
     if (userCredentials) {
-      res.cookie('user_id', userCredentials);
+      req.session['user_id'] = userCredentials;
       res.redirect("/urls");
     } else {
       res.status(403).send('You have entered the wrong password.');
@@ -120,7 +120,7 @@ app.post("/login", (req,res) => {
 
 //Allows user to logout from server by clearing cookies
 app.post("/logout", (req, res) => {
-  res.clearCookie("user_id");
+  req.session['user_id'] = null;
   res.redirect("/urls");
 });
 
@@ -159,7 +159,7 @@ app.post("/urls", (req, res) => {
   let longURL = req.body.longURL;
   const newShortURL = {
     longURL: longURL,
-    userId: req.cookies["user_id"]
+    userId: req.session['user_id']
   };
   urlDatabase[shortURL] = newShortURL;
   console.log(urlDatabase);
@@ -169,7 +169,7 @@ app.post("/urls", (req, res) => {
 //Delete a page whenever called upopn.
 app.post("/urls/:shortURL/delete", (req, res) => {
   let shortURL = req.params.shortURL;
-  const cookieUserId = req.cookies["user_id"];
+  const cookieUserId = req.session['user_id'];
   if (urlDatabase[shortURL].userId === cookieUserId) {
     delete urlDatabase[req.params.shortURL];
     res.redirect("/urls");
@@ -180,7 +180,7 @@ app.post("/urls/:shortURL/delete", (req, res) => {
 //Whenever called on, it will take in the information of the existing longURL, and allows you to edit it
 app.post("/urls/:shortURL", (req, res) => {
   let shortURL = req.params.shortURL;
-  const cookieUserId = req.cookies["user_id"];
+  const cookieUserId = req.session['user_id'];
   if (urlDatabase[shortURL].userId === cookieUserId) {
     let newLongURL = req.body.longURL;
     urlDatabase[req.params.shortURL].longURL = newLongURL;
