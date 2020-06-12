@@ -1,15 +1,20 @@
 const express = require('./node_modules/express');
 const app = express();
 const bodyParser = require("body-parser");
-const cookieParser = require('cookie-parser');
+//const cookieParser = require('cookie-parser');
+const cookieSession = require('cookie-session')
 const bcrypt = require('bcrypt');
 const saltRounds = 10;
 
-
+//Apps for template, injecting text info into the code, and one for cookie encrption
 app.set("view engine", "ejs");
 app.use(bodyParser.urlencoded({extended: true}));
-app.use(cookieParser());
-
+//app.use(cookieParser());
+app.use(cookieSession({
+  name: 'session',
+  keys: ['ddb870d3e75eb646cad9ae1f1c5167a2', '6d576e63daf9125457889ce9049c5725']
+}))
+//Port
 const PORT = process.env.PORT || 8080;
 
 //Adding a name key isn't necessary, but it feels more personalized when you log in and see your name not "Welcome, hello@hello.com!"
@@ -21,7 +26,7 @@ const users = {
     password: bcrypt.hashSync('123', saltRounds)
   },
 };
-
+//Test database
 const urlDatabase = {
   "b2xVn2": {longURL: "http://www.lighthouselabs.ca", userId: "t3st1ng"},
   "9sm5xK": {longURL: "http://www.google.com", userId: "t3st1ng"}
@@ -49,6 +54,12 @@ app.get("/login", (req, res) => {
   res.render("urls_login", templateVars);
 });
 
+// Registration page
+app.get("/register", (req, res) => {
+  let templateVars = { user_id: users[req.cookies["user_id"]] };
+  res.render("urls_register", templateVars);
+});
+
 //Indexof all short URLs, now with a filtered function
 app.get("/urls", (req, res) => {
   const cookieUserId = req.cookies["user_id"];
@@ -62,11 +73,6 @@ app.get("/urls", (req, res) => {
 app.get("/urls/new", (req, res) => {
   let templateVars = { user_id: users[req.cookies["user_id"]] };
   res.render("urls_new", templateVars);
-});
-// Registration page
-app.get("/register", (req, res) => {
-  let templateVars = { user_id: users[req.cookies["user_id"]] };
-  res.render("urls_register", templateVars);
 });
 
 //Instead of using /url/ the link can be found using /u/...
@@ -92,6 +98,31 @@ app.get("/urls/:shortURL", (req, res) => {
 
 
 //---------------POST APPS------------------------------
+
+//Allows you to log into the server
+//Uses two helper functions located below. It seems bad practice, but it allows the server to submit proper messages,tells you that you are not registered if the email doesnt match, or it will tell you the password is incorrect
+app.post("/login", (req,res) => {
+  let email = req.body.email;
+  let password = req.body.password;
+  let userEmail = checkForExistingEmail(email);
+  let userCredentials = validateLogin(email, password);
+  if (userEmail) {
+    if (userCredentials) {
+      res.cookie('user_id', userCredentials);
+      res.redirect("/urls");
+    } else {
+      res.status(403).send('You have entered the wrong password.');
+    }
+  } else {
+    res.status(403).send('You are not registered.');
+  }
+});
+
+//Allows user to logout from server by clearing cookies
+app.post("/logout", (req, res) => {
+  res.clearCookie("user_id");
+  res.redirect("/urls");
+});
 
 //Register a new user
 app.post("/register", (req, res) => {
@@ -135,29 +166,6 @@ app.post("/urls", (req, res) => {
   res.redirect(`/urls/${shortURL}`);
 });
 
-//Allows you to log into the server
-//Uses two helper functions located below. It seems bad practice, but it allows the server to submit proper messages,tells you that you are not registered if the email doesnt match, or it will tell you the password is incorrect
-app.post("/login", (req,res) => {
-  let email = req.body.email;
-  let password = req.body.password;
-  let userEmail = checkForExistingEmail(email);
-  let userCredentials = validateLogin(email, password);
-  if (userEmail) {
-    if (userCredentials) {
-      res.cookie('user_id', userCredentials);
-      res.redirect("/urls");
-    } else {
-      res.status(403).send('You have entered the wrong password.');
-    }
-  } else {
-    res.status(403).send('You are not registered.');
-  }
-});
-//Allows user to logout from server by clearing cookies
-app.post("/logout", (req, res) => {
-  res.clearCookie("user_id");
-  res.redirect("/urls");
-});
 //Delete a page whenever called upopn.
 app.post("/urls/:shortURL/delete", (req, res) => {
   let shortURL = req.params.shortURL;
