@@ -5,7 +5,7 @@ const bodyParser = require("body-parser");
 const cookieSession = require('cookie-session');
 const bcrypt = require('bcrypt');
 const saltRounds = 10;
-
+const checkForExistingEmail = require('./helpers')
 //Apps for template, injecting text info into the code, and one for cookie encrption
 app.set("view engine", "ejs");
 app.use(bodyParser.urlencoded({extended: true}));
@@ -104,7 +104,7 @@ app.get("/urls/:shortURL", (req, res) => {
 app.post("/login", (req,res) => {
   let email = req.body.email;
   let password = req.body.password;
-  let userEmail = checkForExistingEmail(email);
+  let userEmail = checkForExistingEmail(email, users);
   let userCredentials = validateLogin(email, password);
   if (userEmail) {
     if (userCredentials) {
@@ -128,13 +128,15 @@ app.post("/logout", (req, res) => {
 app.post("/register", (req, res) => {
   let userId = generateRandomString();
   let hashedPassword = bcrypt.hashSync(req.body.password, saltRounds);
+  //Put this in the else statement, or else it creates an error everytime you create a false user
   const newUser = {
     id: userId,
     name: req.body.name,
     email: req.body.email,
     password: hashedPassword
   };
-  const userCheck = checkForExistingEmail(req.body.email);
+
+  const userCheck = checkForExistingEmail(req.body.email, users);
   //Checks if any of the registration forms are missing(name, email, or password).
   if (!req.body.name || !req.body.email || !req.body.password) {
     res.status(400).send('You did not complete the registration form, please try again.');
@@ -204,19 +206,11 @@ const generateRandomString = () => {
 //  let userId = Math.random().toString(36).substring(2, 8);
 //  return userId;
 //}
-//Helper function allows you to check for an existing email address, if it encounters it, it returns true.
-const checkForExistingEmail = (email) => {
-  for (let userId in users) {
-    if (users[userId].email === email) {
-      return users[userId];
-    }
-  }
-  return false;
-};
+
 //Validate password
 //Added encryption for passwords
 const validateLogin = (email, password) => {
-  const checkUser = checkForExistingEmail(email);
+  const checkUser = checkForExistingEmail(email, users);
   if (checkUser && bcrypt.compareSync(password, checkUser.password)) {
     return checkUser.id;
   }
